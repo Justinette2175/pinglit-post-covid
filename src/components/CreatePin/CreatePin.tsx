@@ -20,6 +20,7 @@ const CreatePin: React.FC<CreatePinProps> = ({
   boardId,
   startStep,
   endStep,
+  onClose,
 }) => {
   const [user] = useContext(UserContext);
   const firebase = useContext(FirebaseContext);
@@ -28,6 +29,7 @@ const CreatePin: React.FC<CreatePinProps> = ({
   const createPin = async (newPin: NewPin) => {
     try {
       await firebase.firestore.collection("pins").add(newPin);
+      onClose();
     } catch (e) {
       console.log("error creating pin", e);
     }
@@ -42,13 +44,12 @@ const CreatePin: React.FC<CreatePinProps> = ({
       boardId,
       commentsCount: 0,
       location: {
-        percentage: 98,
-        stepValue: 100,
+        percentage: 68,
+        stepValue: 56,
       },
-      referenceQuote: "My test quote 1",
-      content: [
-        { type: "TEXT", text: "An interesting comment I'm making here" },
-      ],
+      referenceQuote:
+        "And then he ran into my knife. He ran into my knife 10 times!",
+      content: [{ type: "TEXT", text: "Another relevant comment" }],
 
       labels: {},
       reactions: {},
@@ -64,7 +65,6 @@ const CreatePin: React.FC<CreatePinProps> = ({
             <Box mb={3}>
               <NumberInput name="page" label="Page" />
             </Box>
-
             <Button type="submit" color="primary" variant="contained">
               Épingler
             </Button>

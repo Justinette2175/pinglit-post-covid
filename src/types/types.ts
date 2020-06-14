@@ -41,10 +41,8 @@ export interface Board {
       username: string;
     };
   };
-  permissions: {
-    users: {
-      [userId: string]: Permission;
-    };
+  members: {
+    [userId: string]: { username: string };
   };
   content: {
     type: BoardContentType;
@@ -117,6 +115,8 @@ export interface NewPin {
   content?: Content[];
 }
 
+type PinPermission = "PRIVATE" | "BOARD_OWNER" | "BOARD";
+
 export interface Pin {
   uid: string;
   boardId: string;
@@ -139,9 +139,7 @@ export interface Pin {
   reactions?: {
     [reactionId: string]: Reaction;
   };
-  permissions: {
-    [userId: string]: Permission;
-  };
+  permission: PinPermission;
 }
 
 export type Content =
@@ -160,11 +158,6 @@ export interface PinComment {
   createdOn: string;
   content: {
     text: string;
-  };
-  permissions: {
-    boardMembers: Permissions;
-    boardOwners: Permissions;
-    commentCreator: Permissions;
   };
 }
 
@@ -199,6 +192,7 @@ interface PinContent {
 export interface ImagePinContent extends PinContent {
   url: string;
   alt: string;
+  widthOverHeight?: number;
 }
 
 export interface VideoPinContent extends PinContent {

@@ -72,6 +72,7 @@ const Board: React.FC<BoardProps> = ({ boardId }) => {
       .onSnapshot((snapshot: any) => {
         const newPins: Array<PinType> = [];
         snapshot.forEach((snap: any) => {
+          console.log("new pin fetched", snap.data());
           newPins.push({ uid: snap.id, ...snap.data() });
         });
         setPins(newPins);
