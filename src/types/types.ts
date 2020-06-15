@@ -32,6 +32,33 @@ export interface Reaction {
   icon?: string;
 }
 
+export interface NewBoard {
+  pinCount: number;
+  createdOn?: string;
+  owners: {
+    [userId: string]: {
+      username: string;
+      hasAccess: boolean;
+    };
+  };
+  members?: {
+    [userId: string]: { username: string; hasAccess: boolean };
+  };
+  content: {
+    type: BoardContentType;
+    title: string;
+    author?: string;
+    image?: string;
+  };
+  stepUnit: {
+    type: StepUnit;
+    key: string;
+  };
+  bookVersions?: {
+    [key: string]: BookVersion;
+  };
+}
+
 export interface Board {
   uid: string;
   pinCount: number;
@@ -100,10 +127,11 @@ export interface NewPin {
     username: string;
     userId: string;
   };
+  permission: PinPermission;
   createdOn?: any;
   location: {
     percentage?: number;
-    stepValue: number | string;
+    stepValue?: number | string;
   };
   referenceQuote?: string;
   labels: {
@@ -115,7 +143,7 @@ export interface NewPin {
   content?: Content[];
 }
 
-type PinPermission = "PRIVATE" | "BOARD_OWNER" | "BOARD";
+export type PinPermission = "PRIVATE" | "BOARD_OWNER" | "BOARD";
 
 export interface Pin {
   uid: string;
@@ -216,4 +244,12 @@ export interface PinDimension {
   height?: number;
   left?: number;
   top?: number;
+}
+
+export interface PinGroup {
+  uid: string;
+  referenceQuoteId: string;
+  percentage: number;
+  referenceQuote: string;
+  pins: Array<Pin>;
 }

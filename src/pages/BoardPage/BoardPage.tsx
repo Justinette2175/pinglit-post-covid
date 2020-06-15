@@ -1,5 +1,6 @@
 import React, { useContext, useState, useEffect, useRef } from "react";
 import { FirebaseContext } from "../../firebase";
+import { UserContext } from "../../contexts";
 
 import { Board, BoardHeader } from "../../components";
 
@@ -20,6 +21,7 @@ const BoardPage: React.FC<BoardPageProps> = ({
   },
 }) => {
   const firebase = useContext(FirebaseContext);
+  const [user] = useContext(UserContext);
   const [error, setError] = useState<Error>(null);
   const [board, setBoard] = useState<BoardType>(null);
 
@@ -44,11 +46,13 @@ const BoardPage: React.FC<BoardPageProps> = ({
     return unsubscribe;
   }, []);
 
+  const userIsBoardOwner = board ? !!board.owners[user.uid] : false;
+
   return (
     <Box width="100vw">
       <BoardHeader data={board} />
       <Box width="100vw">
-        <Board boardId={boardId} />
+        <Board boardId={boardId} userIsBoardOwner={userIsBoardOwner} />
       </Box>
     </Box>
   );

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import clx from "classnames";
-import { Pin as PinType, PinDimension } from "../../types";
+import { PinGroup as PinGroupType, PinDimension } from "../../types";
 import { createStyles, makeStyles, Theme } from "@material-ui/core/styles";
 import Pin from "../Pin";
 
@@ -13,6 +13,8 @@ const usePinStyles = makeStyles((theme: Theme) => {
       paddingRight: "30px",
       opacity: 0,
       transition: ".5s",
+      transform: ({ currentLeft, currentTop }: any) =>
+        `translate(${currentLeft}px, ${currentTop}px)`,
       "&.positioned": {
         opacity: 1,
       },
@@ -21,27 +23,28 @@ const usePinStyles = makeStyles((theme: Theme) => {
 });
 
 interface PinProps {
-  pin: PinType;
+  pinGroup: PinGroupType;
   onDimensions: (pos: PinDimension) => void;
   top: number;
   left: number;
   width: number;
 }
 
-const PinWrapper: React.FC<PinProps> = ({
-  pin,
+const PinGroup: React.FC<PinProps> = ({
+  pinGroup,
   onDimensions,
   left,
   top,
   width,
 }) => {
   const element = useRef<HTMLDivElement>(null);
-  const classes = usePinStyles({ width });
 
   const [{ currentTop, currentLeft }, setCurrent] = useState<{
     currentTop: number;
     currentLeft: number;
   }>({ currentTop: null, currentLeft: null });
+
+  const classes = usePinStyles({ width, currentLeft, currentTop });
 
   useEffect(() => {
     if (element.current) {
@@ -64,15 +67,13 @@ const PinWrapper: React.FC<PinProps> = ({
           (currentTop || currentTop === 0) &&
           (currentLeft || currentLeft === 0),
       })}
-      style={{
-        top: currentTop,
-        left: currentLeft,
-      }}
       ref={element}
     >
-      <Pin data={pin} />
+      {pinGroup.pins.map((pin, i) => (
+        <Pin key={`${pinGroup.referenceQuoteId}-${i}`} data={pin} />
+      ))}
     </div>
   );
 };
 
-export default PinWrapper;
+export default PinGroup;
