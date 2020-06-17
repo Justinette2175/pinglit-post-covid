@@ -10,13 +10,12 @@ export const TextInput = React.forwardRef<HTMLInputElement, TextFieldProps>(
     return (
       <TextField
         margin="normal"
-        {...rest}
         {...field}
         error={meta.touched && meta.error ? true : false}
+        {...rest}
         helperText={(meta.touched && meta.error) || ""}
-        InputLabelProps={{ shrink: true }}
         ref={ref}
-        variant="filled"
+        variant="outlined"
       />
     );
   }

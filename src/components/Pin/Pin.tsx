@@ -7,14 +7,8 @@ import ImagePinContent from "./ImagePinContent";
 import TextPinContent from "./TextPinContent";
 import VideoPinContent from "./VideoPinContent";
 
-import { createStyles, makeStyles, Theme } from "@material-ui/core/styles";
 import { isArray } from "util";
-
-const useStyles = makeStyles((theme: Theme) => {
-  return createStyles({
-    pin: {},
-  });
-});
+import LinkPreview from "components/LinkPerview";
 
 interface PinProps {
   data: PinType;
@@ -25,6 +19,8 @@ const Pin: React.FC<PinProps> = ({ data }) => {
     const typedContent: any = content;
     const key = `${data.uid}-content-${index}`;
     switch (typedContent.type) {
+      case "LINK":
+        return <LinkPreview data={typedContent.metadata} />;
       case "IMAGE":
         return (
           <ImagePinContent
@@ -40,26 +36,23 @@ const Pin: React.FC<PinProps> = ({ data }) => {
     }
   };
 
-  const classes = useStyles();
   return (
-    <Box className={classes.pin}>
-      <Typography>p.{data.location?.stepValue}</Typography>
-      <Typography>{data.referenceQuote}</Typography>
+    <Box py={0.5}>
       <Box>
-        <Box display="flex" justifyContent="space-between">
-          <Typography>
-            <User size={14} />
-            {data.createdBy?.username}
-          </Typography>
-          <Box>
-            <Typography>
-              <MessageSquare size={14} />
-              {data.commentsCount}
-            </Typography>
-          </Box>
-        </Box>
         {isArray(data.content) &&
           data.content.map((c, i) => getContentMarkup(c, i))}
+      </Box>
+      <Box display="flex" justifyContent="space-between">
+        <Typography variant="caption">
+          <User size={14} />
+          {data.createdBy?.username}
+        </Typography>
+        <Box>
+          <Typography variant="caption">
+            <MessageSquare size={14} />
+            {data.commentsCount}
+          </Typography>
+        </Box>
       </Box>
     </Box>
   );

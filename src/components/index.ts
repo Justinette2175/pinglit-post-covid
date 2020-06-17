@@ -5,4 +5,5 @@ export { default as BoardsTools } from "./BoardsTools";
 export { default as BoardHeader } from "./BoardHeader";
 export { default as LogoutButton } from "./LogoutButton";
 export { default as CreatePin } from "./CreatePin";
+export { default as LinkPreview } from "./LinkPerview";
 export * from "./inputs";

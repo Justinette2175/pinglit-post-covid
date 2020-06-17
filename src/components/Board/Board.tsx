@@ -1,18 +1,17 @@
 import React, { useContext, useState, useEffect } from "react";
 import { FirebaseContext } from "../../firebase";
-import { UserContext } from "../../contexts";
+import { UserContext, BoardContext } from "../../contexts";
 
 import { Pin as PinType, PinGroup } from "../../types";
 import BoardInterface from "./BoardInterface";
 
-interface BoardProps {
-  boardId: string;
-  userIsBoardOwner: boolean;
-}
+interface BoardProps {}
 
-const Board: React.FC<BoardProps> = ({ boardId, userIsBoardOwner }) => {
+const Board: React.FC<BoardProps> = () => {
   const firebase = useContext(FirebaseContext);
   const [error, setError] = useState<Error>(null);
+  const board = useContext(BoardContext);
+  const boardId = board ? board.uid : null;
   const [user] = useContext(UserContext);
 
   const [firstStep, setFirstStep] = useState<number>(null);
@@ -92,11 +91,14 @@ const Board: React.FC<BoardProps> = ({ boardId, userIsBoardOwner }) => {
   };
 
   useEffect(() => {
-    getFirstOrLastStep("first");
-    getFirstOrLastStep("last");
-    const unsubscribers = listenToPins();
-    return () => unsubscribe(unsubscribers);
-  }, []);
+    if (boardId) {
+      console.log("BoardID", boardId);
+      getFirstOrLastStep("first");
+      getFirstOrLastStep("last");
+      const unsubscribers = listenToPins();
+      return () => unsubscribe(unsubscribers);
+    }
+  }, [boardId]);
 
   const makePinsGroups = (ungroupedPins: Array<PinType>): Array<PinGroup> => {
     const existingQuoteIds: Array<string> = [];
@@ -109,6 +111,7 @@ const Board: React.FC<BoardProps> = ({ boardId, userIsBoardOwner }) => {
           (group) => group.referenceQuoteId === p.referenceQuoteId
         );
         acc[index].pins.push(p);
+        acc[index].pinCount += 1;
       } else {
         if (p.referenceQuoteId) {
           existingQuoteIds.push(p.referenceQuoteId);
@@ -119,6 +122,7 @@ const Board: React.FC<BoardProps> = ({ boardId, userIsBoardOwner }) => {
           percentage: p.location.percentage,
           referenceQuoteId: p.referenceQuoteId,
           pins: [p],
+          pinCount: 1,
         });
       }
       return acc;
@@ -128,8 +132,6 @@ const Board: React.FC<BoardProps> = ({ boardId, userIsBoardOwner }) => {
   const pinGroups = makePinsGroups([...creatorPins, ...boardVisiblePins]).sort(
     (a, b) => a.percentage - b.percentage
   );
-
-  console.log("pins are", pinGroups);
 
   return <BoardInterface boardId={boardId} pinsGroups={pinGroups} />;
 };

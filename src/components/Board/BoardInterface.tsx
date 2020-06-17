@@ -4,7 +4,7 @@ import { ZoomIn, ZoomOut } from "react-feather";
 import { PinGroup as PinGroupType, PinDimension } from "../../types";
 import { Box, IconButton } from "@material-ui/core";
 import { BoardTools } from "../../components";
-import PinGroup from "./PinGroup";
+import PinGroupWrapper from "./PinGroupWrapper";
 
 const CARD_WIDTH = 350;
 
@@ -133,7 +133,7 @@ const Board: React.FC<BoardProps> = ({
           const isLast = i === arr.length - 1;
           const pinPosition = getPinPosition(p, arr[i - 1], isLast);
           return (
-            <PinGroup
+            <PinGroupWrapper
               width={pinWidth}
               key={`pin-${i}`}
               pinGroup={p}

@@ -20,6 +20,7 @@ export const lightTheme = createMuiTheme({
       contained: { boxShadow: "none" },
     },
   },
+
   typography: {
     h1: {
       fontSize: "3rem",

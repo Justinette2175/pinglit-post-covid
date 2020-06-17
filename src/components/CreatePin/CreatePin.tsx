@@ -1,11 +1,12 @@
 import React, { useState, useContext } from "react";
 import { FirebaseContext } from "../../firebase";
-import { UserContext } from "../../contexts";
-import { Button, Box } from "@material-ui/core";
-import { NumberInput, Select, TextInput } from "../inputs";
+import { UserContext, BoardContext } from "../../contexts";
+import { Button, Box, Divider, Typography } from "@material-ui/core";
+import { NumberInput, Select, TextInput, LinkInput } from "../inputs";
 import { Form, Formik } from "formik";
 import * as Yup from "yup";
-import { NewPin, PinPermission } from "../../types";
+import { NewPin, PinPermission, LinkPreview } from "../../types";
+import PinContentTypeInput, { PinContentType } from "./PinContentTypeInput";
 
 const PERMISSION_OPTIONS: Array<{ label: string; value: PinPermission }> = [
   { label: "Only me", value: "PRIVATE" },
@@ -16,18 +17,20 @@ interface FormValues {
   permission: PinPermission;
   percentage: number;
   quote: string;
-  note: string;
+  text: string;
+  link: {
+    url: string;
+    metadata: LinkPreview;
+  };
 }
 
 interface CreatePinProps {
-  boardId: string;
   onClose: () => void;
   startStep?: number;
   endStep?: number;
 }
 
 const CreatePin: React.FC<CreatePinProps> = ({
-  boardId,
   startStep,
   endStep,
   onClose,
@@ -35,6 +38,10 @@ const CreatePin: React.FC<CreatePinProps> = ({
   const [user] = useContext(UserContext);
   const firebase = useContext(FirebaseContext);
   const [error, setError] = useState<Error>(null);
+  const [selectedType, setSelectedType] = useState<PinContentType>(null);
+
+  const board = useContext(BoardContext);
+  const boardId = board ? board.uid : null;
 
   const createPin = async (newPin: NewPin) => {
     try {
@@ -46,6 +53,12 @@ const CreatePin: React.FC<CreatePinProps> = ({
   };
 
   const handleSubmit = (values: FormValues) => {
+    let content = [];
+    if (selectedType && selectedType === "LINK" && values.link) {
+      content.push({ ...values.link, type: "LINK" });
+    } else if (selectedType && selectedType === "TEXT" && values.text) {
+      content.push({ text: values.text, type: "TEXT" });
+    }
     const newPin: NewPin = {
       createdBy: {
         username: user.username || "",
@@ -58,8 +71,7 @@ const CreatePin: React.FC<CreatePinProps> = ({
         percentage: values.percentage,
       },
       referenceQuote: values.quote,
-      content: [{ type: "TEXT", text: values.note }],
-
+      content,
       labels: {},
       reactions: {},
     };
@@ -80,28 +92,54 @@ const CreatePin: React.FC<CreatePinProps> = ({
           permission: "PRIVATE",
           percentage: 0,
           quote: "",
-          note: "",
+          text: "",
+          link: {
+            url: "",
+            metadata: null,
+          },
         }}
         onSubmit={handleSubmit}
       >
         {({ isValid, values }) => (
           <Form>
-            <Box mb={3}>
-              <NumberInput name="percentage" label="Percentage" />
+            <Box maxWidth="100px">
+              <NumberInput name="percentage" label="Percentage" fullWidth />
             </Box>
-            <Box mb={3}>
-              <TextInput name="quote" label="Quote" />
-            </Box>
-            <Box mb={3}>
-              <TextInput name="note" label="Note" />
-            </Box>
-            <Box mb={3}>
-              <Select
-                name="permission"
-                label="Permission"
-                options={PERMISSION_OPTIONS}
+            <TextInput
+              name="quote"
+              label="Quote from the book"
+              multiline
+              rows={4}
+              fullWidth
+            />
+
+            <Divider />
+
+            <Typography>Add content to your pin</Typography>
+            <PinContentTypeInput
+              onUpdate={setSelectedType}
+              value={selectedType}
+            />
+            {selectedType === "LINK" && (
+              <LinkInput
+                name="link"
+                label="Copy paste a link from the internet"
               />
-            </Box>
+            )}
+            {selectedType === "TEXT" && (
+              <TextInput
+                name="text"
+                label="Write something about this pin"
+                fullWidth
+              />
+            )}
+            <Divider />
+            <Select
+              fullWidth
+              name="permission"
+              label="Who can see this?"
+              options={PERMISSION_OPTIONS}
+            />
             <Button
               disabled={!isValid}
               type="submit"

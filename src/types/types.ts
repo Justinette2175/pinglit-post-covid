@@ -1,6 +1,10 @@
+import { string } from "yup";
+
 type BoardContentType = "BOOK" | "ARTICLE";
 type StepUnit = "INTEGER" | "NUMBER" | "LETTER";
 type PinType =
+  | "YOUTUBE"
+  | "VIMEO"
   | "IMAGE"
   | "VIDEO"
   | "REACTION"
@@ -140,7 +144,7 @@ export interface NewPin {
   reactions?: {
     [reactionId: string]: Reaction;
   };
-  content?: Content[];
+  content?: any[];
 }
 
 export type PinPermission = "PRIVATE" | "BOARD_OWNER" | "BOARD";
@@ -171,6 +175,7 @@ export interface Pin {
 }
 
 export type Content =
+  | LinkPinContent
   | ImagePinContent
   | VideoPinContent
   | TextPinContent
@@ -190,7 +195,7 @@ export interface PinComment {
 }
 
 export interface User {
-  uid: string;
+  uid?: string;
   username?: string;
   billingAccount?: {
     id: string;
@@ -240,6 +245,11 @@ export interface AudioPinContent extends PinContent {
   url: string;
 }
 
+export interface LinkPinContent extends PinContent {
+  url: string;
+  metadata: LinkPreview;
+}
+
 export interface PinDimension {
   height?: number;
   left?: number;
@@ -252,4 +262,20 @@ export interface PinGroup {
   percentage: number;
   referenceQuote: string;
   pins: Array<Pin>;
+  pinCount: number;
+}
+
+export interface LinkPreview {
+  image: string;
+  title: string;
+  description: string;
+  type: string;
+  siteName: string;
+  imageRatio?: number;
+}
+
+export interface BoardInvitation {
+  boardId: string;
+  password?: string;
+  uid: string;
 }

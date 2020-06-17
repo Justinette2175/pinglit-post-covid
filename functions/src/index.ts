@@ -1,4 +1,7 @@
 import * as functions from "firebase-functions";
+import previewUrl from "./previewUrl";
+import validateInvitationAccess from "./validateInvitationAccess";
+
 const admin = require("firebase-admin");
 const algoliasearch = require("algoliasearch");
 
@@ -67,6 +70,24 @@ const createNewReferenceQuote = async (
     return "";
   }
 };
+
+exports.previewUrl = functions.https.onCall((data, context) => {
+  if (data.url) {
+    return previewUrl(data.url);
+  } else return null;
+});
+
+exports.validateInvitationAccess = functions.https.onCall((data, context) => {
+  const userId = context?.auth?.uid;
+  if (data.invitationId && userId) {
+    return validateInvitationAccess(
+      db,
+      context?.auth,
+      data.invitationId,
+      data.password
+    );
+  } else return null;
+});
 
 exports.onCreatePin = functions.firestore
   .document("pins/{pinId}")

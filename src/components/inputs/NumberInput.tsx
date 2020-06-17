@@ -66,12 +66,11 @@ export const NumberInput: React.FC<NumberInputProps> = ({
       {...getFormatProps()}
       value={formattedValue}
       displayType="input"
-      variant="filled"
+      variant="outlined"
       error={meta.touched && meta.error}
       helperText={(meta.touched && meta.error) || ""}
       allowLeadingZeros={false}
       InputProps={{ startAdornment, endAdornment }}
-      InputLabelProps={{ shrink: true }}
       isNumericString
       onValueChange={(val: any) => {
         setFormattedValue(val.formattedValue);

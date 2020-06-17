@@ -1,79 +1,49 @@
-import React, { useState, useEffect, useRef } from "react";
-import clx from "classnames";
-import { PinGroup as PinGroupType, PinDimension } from "../../types";
-import { createStyles, makeStyles, Theme } from "@material-ui/core/styles";
-import Pin from "../Pin";
+import React from "react";
 
-const usePinStyles = makeStyles((theme: Theme) => {
+import { PinGroup } from "../../types";
+import Pin from "../Pin";
+import { Box, Typography } from "@material-ui/core";
+import { createStyles, makeStyles, Theme } from "@material-ui/core/styles";
+
+const useStyles = makeStyles((theme: Theme) => {
   return createStyles({
-    pin: {
-      width: ({ width }: any) => width,
-      position: "absolute",
-      paddingBottom: "30px",
-      paddingRight: "30px",
-      opacity: 0,
-      transition: ".5s",
-      transform: ({ currentLeft, currentTop }: any) =>
-        `translate(${currentLeft}px, ${currentTop}px)`,
-      "&.positioned": {
-        opacity: 1,
-      },
+    pinGroup: {
+      backgroundColor: theme.palette.background.paper,
+      borderRadius: theme.shape.borderRadius,
+      padding: theme.spacing(2),
+    },
+    multiPin: {
+      borderRadius: theme.shape.borderRadius,
+      border: `1px solid ${theme.palette.divider}`,
+      marginBottom: theme.spacing(1),
+      padding: `${theme.spacing(0.5)}px ${theme.spacing(1)}px`,
     },
   });
 });
 
-interface PinProps {
-  pinGroup: PinGroupType;
-  onDimensions: (pos: PinDimension) => void;
-  top: number;
-  left: number;
-  width: number;
+interface PinGroupHeaderProps {
+  pinGroup: PinGroup;
 }
 
-const PinGroup: React.FC<PinProps> = ({
-  pinGroup,
-  onDimensions,
-  left,
-  top,
-  width,
-}) => {
-  const element = useRef<HTMLDivElement>(null);
-
-  const [{ currentTop, currentLeft }, setCurrent] = useState<{
-    currentTop: number;
-    currentLeft: number;
-  }>({ currentTop: null, currentLeft: null });
-
-  const classes = usePinStyles({ width, currentLeft, currentTop });
-
-  useEffect(() => {
-    if (element.current) {
-      const height = element.current.offsetHeight;
-      onDimensions({ height });
-    }
-  }, []);
-
-  useEffect(() => {
-    if ((left || left === 0) && (top || top === 0)) {
-      onDimensions({ left, top });
-      setCurrent({ currentTop: top, currentLeft: left });
-    }
-  }, [left, top]);
-
+const PinGroupHeader: React.FC<PinGroupHeaderProps> = ({ pinGroup }) => {
+  const classes = useStyles();
   return (
-    <div
-      className={clx(classes.pin, {
-        positioned:
-          (currentTop || currentTop === 0) &&
-          (currentLeft || currentLeft === 0),
-      })}
-      ref={element}
-    >
-      {pinGroup.pins.map((pin, i) => (
-        <Pin key={`${pinGroup.referenceQuoteId}-${i}`} data={pin} />
-      ))}
-    </div>
+    <Box className={classes.pinGroup}>
+      <Box mb={2}>
+        <Typography variant="caption">{pinGroup.percentage}%</Typography>
+        <Typography variant="body2">{pinGroup.referenceQuote}</Typography>
+      </Box>
+      {pinGroup.pins.length > 1 ? (
+        pinGroup.pins.map((pin, i) => (
+          <Box className={classes.multiPin}>
+            <Pin key={`${pinGroup.referenceQuoteId}-${i}`} data={pin} />
+          </Box>
+        ))
+      ) : (
+        <Pin key={`${pinGroup.referenceQuoteId}`} data={pinGroup.pins[0]} />
+      )}
+    </Box>
   );
 };
 
-export default PinGroup;
+export default PinGroupHeader;

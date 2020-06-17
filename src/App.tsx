@@ -10,6 +10,7 @@ import BoardPage from "./pages/BoardPage";
 import BoardsPage from "./pages/BoardsPage";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
+import InvitationPage from "./pages/InvitationPage";
 
 import { MuiThemeProvider } from "@material-ui/core/styles";
 import { CssBaseline, Box } from "@material-ui/core";
@@ -22,24 +23,73 @@ import AppBar from "./components/AppBar";
 
 const firebase = new Firebase();
 
+interface AuthData {
+  authUser: User;
+  authenticated: boolean;
+  loading: boolean;
+}
+
 function App() {
-  const [user, setUser] = useState<User>(null);
+  const [user, setUser] = useState<User>({});
+  const [{ authUser, authenticated, loading }, setAuthData] = useState<
+    AuthData
+  >({
+    authUser: null,
+    loading: true,
+    authenticated: false,
+  });
 
   useEffect(() => {
-    firebase.auth.onAuthStateChanged((user: any) => {
+    const unsubsribe = firebase.auth.onAuthStateChanged((user: any) => {
       if (user) {
-        setUser({ uid: user.uid });
+        setAuthData({ authUser: user, authenticated: true, loading: false });
       } else {
-        setUser(null);
+        setAuthData({ authUser: null, authenticated: false, loading: false });
       }
     });
+    return () => unsubsribe();
   }, []);
 
-  const PrivateRoute: React.FC<any> = (props: any) => {
-    if (!user) {
-      return <Redirect to="/login" />;
-    } else return <Route {...props} />;
+  const listenToUser = () => {
+    try {
+      firebase.firestore
+        .collection("users")
+        .doc(authUser.uid)
+        .onSnapshot((u: any) => {
+          setUser({ uid: u.id, ...u.data() });
+        });
+    } catch (e) {}
   };
+
+  useEffect(() => {
+    let unsubscribeFromUser: any;
+    if (authUser) {
+      unsubscribeFromUser = listenToUser();
+    }
+    return () => {
+      if (unsubscribeFromUser) {
+        unsubscribeFromUser();
+      }
+    };
+  }, [authUser]);
+
+  const PrivateRoute: React.FC<any> = (props: any) => {
+    if (!authenticated) {
+      return (
+        <Redirect
+          to={{
+            pathname: "/login",
+            search: `?redirect=${props.location.pathname}`,
+          }}
+        />
+      );
+    }
+    return <Route {...props} />;
+  };
+
+  if (loading) {
+    return <div>Loading</div>;
+  }
 
   return (
     <FirebaseContext.Provider value={firebase}>
@@ -54,21 +104,21 @@ function App() {
                 path="/"
                 render={() => <Redirect to="/boards" />}
               />
+              <PrivateRoute
+                path="/invitations/:invitationId"
+                component={InvitationPage}
+              />
               <PrivateRoute exact path="/boards" component={BoardsPage} />
               <PrivateRoute path="/boards/:boardId" component={BoardPage} />
               <Route
                 exact
                 path="/login"
-                render={(props) =>
-                  user ? <Redirect to="/boards" /> : <LoginPage {...props} />
-                }
+                render={(props) => <LoginPage {...props} />}
               />
               <Route
                 exact
                 path="/register"
-                render={(props) =>
-                  user ? <Redirect to="/boards" /> : <RegisterPage {...props} />
-                }
+                render={(props) => <RegisterPage {...props} />}
               />
               <Route component={I404Page} />
             </Switch>

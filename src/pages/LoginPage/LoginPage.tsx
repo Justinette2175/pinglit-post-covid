@@ -10,20 +10,33 @@ export interface FormValues {
   password: string;
 }
 
-interface LoginPageProps {}
+interface LoginPageProps {
+  location: {
+    search: string;
+  };
+}
 
-const LoginPage: React.FC<LoginPageProps> = () => {
+const LoginPage: React.FC<LoginPageProps> = ({ location: { search } }) => {
   const firebase = useContext(FirebaseContext);
   const [error, setError] = useState<Error>(null);
+  const [redirect, setRedirect] = useState<string>("");
 
-  const login = async ({ email, password }: FormValues): Promise<void> => {
+  const params: any = new URLSearchParams(search);
+  const redirectPath = params.get("redirect");
+
+  const login = async ({ email, password }: FormValues): Promise<any> => {
     try {
       await firebase.auth.signInWithEmailAndPassword(email, password);
+      setRedirect(redirectPath);
     } catch (e) {
       console.log(e);
       setError(e);
     }
   };
+
+  if (redirect) {
+    return <Redirect to={redirect} />;
+  }
 
   return <LoginForm onSubmit={login} error={error} />;
 };
