@@ -27,6 +27,7 @@ const RegisterPage: React.FC<RegisterPageProps> = () => {
         .doc(userCredentials.user.uid)
         .set({});
     } catch (e) {
+      console.log("RegisterPage:register", e);
       setError(e);
     }
   };

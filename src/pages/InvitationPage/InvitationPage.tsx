@@ -3,6 +3,7 @@ import { FirebaseContext } from "../../firebase";
 import { Box, Button } from "@material-ui/core";
 import { Form, Formik } from "formik";
 import { TextInput } from "../../components/inputs";
+import { Redirect } from "react-router";
 
 interface InvitationPageProps {
   match: {
@@ -19,6 +20,7 @@ const InvitationPage: React.FC<InvitationPageProps> = ({
 }) => {
   const firebase = useContext(FirebaseContext);
   const [isValidInvitation, setIsValidInvitation] = useState<boolean>(null);
+  const [redirect, setRedirect] = useState<string>(null);
 
   const getInvitation = async () => {
     const invitation = await firebase.firestore
@@ -30,7 +32,22 @@ const InvitationPage: React.FC<InvitationPageProps> = ({
     }
   };
 
-  const handleSubmit = ({ password }: { password: string }) => {};
+  const handleSubmit = async ({ password }: { password: string }) => {
+    try {
+      const res = await firebase.functions.httpsCallable(
+        "validateInvitationAccess"
+      )({
+        invitationId,
+        password,
+      });
+      console.log("boardId", res.data);
+      if (res.data) {
+        setRedirect(`/boards/${res.data}`);
+      }
+    } catch (e) {
+      console.log(e);
+    }
+  };
 
   useEffect(() => {
     getInvitation();
@@ -41,6 +58,10 @@ const InvitationPage: React.FC<InvitationPageProps> = ({
   }
   if (!isValidInvitation) {
     return <div>Invalid invitation</div>;
+  }
+
+  if (redirect) {
+    return <Redirect to={redirect} />;
   }
 
   return (

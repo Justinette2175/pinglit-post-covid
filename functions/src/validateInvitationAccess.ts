@@ -1,3 +1,5 @@
+import * as functions from "firebase-functions";
+
 const validateInvitationAccess = async (
   db: any,
   auth: any,
@@ -13,22 +15,32 @@ const validateInvitationAccess = async (
         .doc("private")
         .get();
       if (privateDoc.exists) {
+        const boardId = invitationDoc.data().boardId;
         if (privateDoc.data().password === password) {
           await db
             .collection("boards")
-            .doc(invitationDoc.data().boardId)
+            .doc(boardId)
             .update({
-              [`owners[${auth.uid}]`]: {
+              [`owners.${auth.uid}`]: {
                 username: "",
               },
             });
-          return true;
+          return boardId;
+        } else {
+          throw new functions.https.HttpsError(
+            "permission-denied",
+            "The password your entered is wrong."
+          );
         }
       }
+    } else {
+      throw new functions.https.HttpsError(
+        "not-found",
+        "This invitation is not valid."
+      );
     }
-    return false;
   } catch (e) {
-    return false;
+    throw e;
   }
 };
 

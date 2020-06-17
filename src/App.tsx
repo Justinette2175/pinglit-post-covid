@@ -118,7 +118,13 @@ function App() {
               <Route
                 exact
                 path="/register"
-                render={(props) => <RegisterPage {...props} />}
+                render={(props) =>
+                  authenticated ? (
+                    <Redirect to="/boards" />
+                  ) : (
+                    <RegisterPage {...props} />
+                  )
+                }
               />
               <Route component={I404Page} />
             </Switch>

@@ -29,7 +29,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ location: { search } }) => {
       await firebase.auth.signInWithEmailAndPassword(email, password);
       setRedirect(redirectPath);
     } catch (e) {
-      console.log(e);
+      console.log("LoginPage:login", e);
       setError(e);
     }
   };
