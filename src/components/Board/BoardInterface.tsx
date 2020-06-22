@@ -1,34 +1,52 @@
 import React, { useState, useEffect } from "react";
-import { ZoomIn, ZoomOut } from "react-feather";
 
-import { PinGroup as PinGroupType, PinDimension } from "../../types";
+import { PinGroup as PinGroupType, PinDimension, Pin } from "../../types";
 import { Box, IconButton } from "@material-ui/core";
-import { BoardTools } from "../../components";
 import PinGroupWrapper from "./PinGroupWrapper";
+import PinGroup from "./PinGroup";
+import FocusPin from "components/FocusPin";
 
-const CARD_WIDTH = 350;
+import { createStyles, makeStyles, Theme } from "@material-ui/core/styles";
+import zIndex from "@material-ui/core/styles/zIndex";
+const useStyles = makeStyles((theme: Theme) => {
+  return createStyles({
+    board: {
+      backgroundColor: theme.palette.primary.main,
+    },
+    boardBg: {
+      backgroundColor: theme.palette.primary.main,
+      height: "100vh",
+      width: "100vw",
+      zIndex: 0,
+      position: "fixed",
+    },
+  });
+});
+
+const CARD_WIDTH = 300;
 
 interface BoardProps {
   boardId: string;
   firstStep?: number;
   lastStep?: number;
   pinsGroups: Array<PinGroupType>;
+  numberOfColumns: number;
 }
 
 type Interval = Array<number>;
 
 const Board: React.FC<BoardProps> = ({
-  boardId,
   pinsGroups,
   firstStep = 0,
   lastStep = 100,
+  numberOfColumns,
 }) => {
   const [pinWidth, setPinWidth] = useState<number>(CARD_WIDTH);
-  const [numberOfColumns, setNumberOfColumns] = useState<number>(4);
   const [intervals, setIntervals] = useState<Array<Interval>>([]);
   const [pinPositions, setPinPositions] = useState<{
     [pinId: string]: PinDimension;
   }>({});
+  const [focusedPin, setFocusedPin] = useState<Pin>(null);
 
   const makeIntervals = async () => {
     const distance = lastStep - firstStep + 1;
@@ -44,17 +62,6 @@ const Board: React.FC<BoardProps> = ({
   useEffect(() => {
     makeIntervals();
   }, [numberOfColumns]);
-
-  const handleZoomIn = () => {
-    setNumberOfColumns(numberOfColumns + 1);
-  };
-
-  const handleZoomOut = () => {
-    const newNumberOfColumns = numberOfColumns - 1;
-    if (newNumberOfColumns > 0) {
-      setNumberOfColumns(newNumberOfColumns);
-    }
-  };
 
   const handleNewPinDimensions = (pinId: string, dimensions: PinDimension) => {
     setPinPositions((current: { [pinId: string]: PinDimension }) => {
@@ -115,19 +122,11 @@ const Board: React.FC<BoardProps> = ({
     return { top, left };
   };
 
-  console.log("pin positions", pinPositions);
+  const classes = useStyles();
 
   return (
     <>
-      <BoardTools boardId={boardId} />
-      <Box ml={2}>
-        <IconButton onClick={handleZoomIn}>
-          <ZoomIn size={20} />
-        </IconButton>
-        <IconButton onClick={handleZoomOut}>
-          <ZoomOut size={20} />
-        </IconButton>
-      </Box>
+      <Box className={classes.boardBg}></Box>
       <Box position="relative">
         {pinsGroups.map((p, i, arr) => {
           const isLast = i === arr.length - 1;
@@ -142,10 +141,17 @@ const Board: React.FC<BoardProps> = ({
               }
               top={pinPosition.top}
               left={pinPosition.left}
-            />
+            >
+              <PinGroup pinGroup={p} onPinClick={(p) => setFocusedPin(p)} />
+            </PinGroupWrapper>
           );
         })}
       </Box>
+      <FocusPin
+        pin={focusedPin}
+        open={!!focusedPin}
+        onClose={() => setFocusedPin(null)}
+      />
     </>
   );
 };

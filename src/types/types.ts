@@ -93,15 +93,11 @@ export interface Board {
       username: string;
     };
   };
-  boardLabels: {
-    [labelId: string]: Label;
-  };
+  boardLabels: Array<Label>;
   usedLabels: {
     [labelId: string]: Label;
   };
-  boardReactions: {
-    [reactionId: string]: Reaction;
-  };
+  boardReactions: Array<Reaction>;
   usedReactions: {
     [reactionId: string]: Reaction;
   };
@@ -148,6 +144,7 @@ export interface NewPin {
 }
 
 export type PinPermission = "PRIVATE" | "BOARD_OWNER" | "BOARD";
+export type PinCommentPermission = "NONE" | "BOARD" | "COMMENTOR";
 
 export interface Pin {
   uid: string;
@@ -172,6 +169,7 @@ export interface Pin {
     [reactionId: string]: Reaction;
   };
   permission: PinPermission;
+  commentPermission: PinCommentPermission;
 }
 
 export type Content =
@@ -184,9 +182,8 @@ export type Content =
 
 export interface PinComment {
   createdBy: {
-    [userId: string]: {
-      username: string;
-    };
+    uid: string;
+    username: string;
   };
   createdOn: string;
   content: {
@@ -278,4 +275,10 @@ export interface BoardInvitation {
   boardId: string;
   password?: string;
   uid: string;
+}
+
+export interface BoardFilters {
+  labels: Array<string>;
+  reactions: Array<string>;
+  authors: Array<string>;
 }

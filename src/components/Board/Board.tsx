@@ -2,17 +2,20 @@ import React, { useContext, useState, useEffect } from "react";
 import { FirebaseContext } from "../../firebase";
 import { UserContext, BoardContext } from "../../contexts";
 
-import { Pin as PinType, PinGroup } from "../../types";
+import { Pin as PinType, PinGroup, BoardFilters } from "../../types";
 import BoardInterface from "./BoardInterface";
 
-interface BoardProps {}
+interface BoardProps {
+  filters: BoardFilters;
+  numberOfColumns: number;
+}
 
-const Board: React.FC<BoardProps> = () => {
+const Board: React.FC<BoardProps> = ({ filters, numberOfColumns }) => {
   const firebase = useContext(FirebaseContext);
   const [error, setError] = useState<Error>(null);
   const board = useContext(BoardContext);
   const boardId = board ? board.uid : null;
-  const [user] = useContext(UserContext);
+  const user = useContext(UserContext);
 
   const [firstStep, setFirstStep] = useState<number>(null);
   const [lastStep, setLastStep] = useState<number>(null);
@@ -22,50 +25,54 @@ const Board: React.FC<BoardProps> = () => {
   const [boardVisiblePins, setBoardVisiblePins] = useState<Array<PinType>>([]);
 
   const getFirstOrLastStep = async (which: "first" | "last"): Promise<void> => {
-    let pinSnapshot;
-    if (which === "first") {
-      pinSnapshot = await firebase.firestore
-        .collection("pins")
-        .where("boardId", "==", boardId)
-        .orderBy("location.percentage")
-        .limit(1)
-        .get();
-    } else {
-      pinSnapshot = await firebase.firestore
-        .collection("pins")
-        .where("boardId", "==", boardId)
-        .orderBy("location.percentage", "desc")
-        .limit(1)
-        .get();
-    }
-    let step;
-    pinSnapshot.forEach((p: any) => (step = p.data().location.percentage));
-    if (which === "first") {
-      setFirstStep(step);
-    } else if (which === "last") {
-      setLastStep(step);
+    if (boardId) {
+      let pinSnapshot;
+      if (which === "first") {
+        pinSnapshot = await firebase.firestore
+          .collection("pins")
+          .where("boardId", "==", boardId)
+          .orderBy("location.percentage")
+          .limit(1)
+          .get();
+      } else {
+        pinSnapshot = await firebase.firestore
+          .collection("pins")
+          .where("boardId", "==", boardId)
+          .orderBy("location.percentage", "desc")
+          .limit(1)
+          .get();
+      }
+      let step;
+      pinSnapshot.forEach((p: any) => (step = p.data().location.percentage));
+      if (which === "first") {
+        setFirstStep(step);
+      } else if (which === "last") {
+        setLastStep(step);
+      }
     }
   };
 
   const fetchCreatorPins = (): any => {
-    return firebase.firestore
-      .collection("pins")
-      .where("boardId", "==", boardId)
-      .where("permission", "==", "PRIVATE")
-      .where("createdBy.userId", "==", user.uid)
-      .onSnapshot((snapshot: any) => {
-        const newPins: Array<PinType> = [];
-        snapshot.forEach((snap: any) => {
-          newPins.push({ uid: snap.id, ...snap.data() });
+    if (boardId) {
+      return firebase.firestore
+        .collection("pins")
+        .where("boardId", "==", boardId || "")
+        .where("permission", "==", "PRIVATE")
+        .where("createdBy.userId", "==", user.uid)
+        .onSnapshot((snapshot: any) => {
+          const newPins: Array<PinType> = [];
+          snapshot.forEach((snap: any) => {
+            newPins.push({ uid: snap.id, ...snap.data() });
+          });
+          setCreatorPins(newPins);
         });
-        setCreatorPins(newPins);
-      });
+    }
   };
 
   const fetchBoardVisiblePins = (): any => {
     return firebase.firestore
       .collection("pins")
-      .where("boardId", "==", boardId)
+      .where("boardId", "==", boardId || "")
       .where("permission", "==", "BOARD")
       .onSnapshot((snapshot: any) => {
         const newPins: Array<PinType> = [];
@@ -92,7 +99,6 @@ const Board: React.FC<BoardProps> = () => {
 
   useEffect(() => {
     if (boardId) {
-      console.log("BoardID", boardId);
       getFirstOrLastStep("first");
       getFirstOrLastStep("last");
       const unsubscribers = listenToPins();
@@ -129,11 +135,19 @@ const Board: React.FC<BoardProps> = () => {
     }, []);
   };
 
-  const pinGroups = makePinsGroups([...creatorPins, ...boardVisiblePins]).sort(
+  const pins = [...creatorPins, ...boardVisiblePins];
+
+  const pinGroups = makePinsGroups(pins).sort(
     (a, b) => a.percentage - b.percentage
   );
 
-  return <BoardInterface boardId={boardId} pinsGroups={pinGroups} />;
+  return (
+    <BoardInterface
+      boardId={boardId}
+      pinsGroups={pinGroups}
+      numberOfColumns={numberOfColumns}
+    />
+  );
 };
 
 export default Board;

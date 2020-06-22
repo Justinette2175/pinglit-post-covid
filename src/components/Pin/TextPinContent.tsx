@@ -16,7 +16,7 @@ interface TextPinContentProps {
 const TextPinContent: React.FC<TextPinContentProps> = ({ text }) => {
   const classes = useStyles();
   return (
-    <Box className={classes.pin}>
+    <Box className={classes.pin} px={2}>
       <Typography>{text}</Typography>
     </Box>
   );

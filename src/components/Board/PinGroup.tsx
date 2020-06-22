@@ -1,47 +1,51 @@
 import React from "react";
+import Quote from "../Text/Quote";
 
-import { PinGroup } from "../../types";
+import { PinGroup, Pin as PinType } from "../../types";
 import Pin from "../Pin";
-import { Box, Typography } from "@material-ui/core";
+import { Box, Typography, Card, CardActionArea } from "@material-ui/core";
 import { createStyles, makeStyles, Theme } from "@material-ui/core/styles";
+import clx from "classnames";
 
 const useStyles = makeStyles((theme: Theme) => {
   return createStyles({
     pinGroup: {
-      backgroundColor: theme.palette.background.paper,
+      paddingTop: theme.spacing(2),
       borderRadius: theme.shape.borderRadius,
-      padding: theme.spacing(2),
+      backgroundColor: "rgba(255, 255, 255, 0.8)",
     },
     multiPin: {
-      borderRadius: theme.shape.borderRadius,
-      border: `1px solid ${theme.palette.divider}`,
       marginBottom: theme.spacing(1),
-      padding: `${theme.spacing(0.5)}px ${theme.spacing(1)}px`,
     },
   });
 });
 
 interface PinGroupHeaderProps {
   pinGroup: PinGroup;
+  onPinClick: (p: PinType) => void;
 }
 
-const PinGroupHeader: React.FC<PinGroupHeaderProps> = ({ pinGroup }) => {
+const PinGroupHeader: React.FC<PinGroupHeaderProps> = ({
+  pinGroup,
+  onPinClick,
+}) => {
   const classes = useStyles();
+
   return (
-    <Box className={classes.pinGroup}>
-      <Box mb={2}>
+    <Box className={clx(classes.pinGroup)}>
+      <Box mb={2} px={2}>
         <Typography variant="caption">{pinGroup.percentage}%</Typography>
-        <Typography variant="body2">{pinGroup.referenceQuote}</Typography>
+        <Quote text={pinGroup.referenceQuote} />
       </Box>
-      {pinGroup.pins.length > 1 ? (
-        pinGroup.pins.map((pin, i) => (
-          <Box className={classes.multiPin}>
-            <Pin key={`${pinGroup.referenceQuoteId}-${i}`} data={pin} />
-          </Box>
-        ))
-      ) : (
-        <Pin key={`${pinGroup.referenceQuoteId}`} data={pinGroup.pins[0]} />
-      )}
+      {pinGroup.pins.map((pin, i) => (
+        <Box className={classes.multiPin}>
+          <Card elevation={0}>
+            <CardActionArea onClick={() => onPinClick(pin)}>
+              <Pin key={`${pinGroup.referenceQuoteId}-${i}`} data={pin} />
+            </CardActionArea>
+          </Card>
+        </Box>
+      ))}
     </Box>
   );
 };

@@ -40,7 +40,6 @@ const InvitationPage: React.FC<InvitationPageProps> = ({
         invitationId,
         password,
       });
-      console.log("boardId", res.data);
       if (res.data) {
         setRedirect(`/boards/${res.data}`);
       }

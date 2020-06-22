@@ -9,7 +9,7 @@ interface BoardsPageProps {}
 
 const BoardsPage: React.FC<BoardsPageProps> = () => {
   const firebase = useContext(FirebaseContext);
-  const [user] = useContext(UserContext);
+  const user = useContext(UserContext);
   const [error, setError] = useState<Error>(null);
   const [memberBoards, setMemberBoards] = useState<Array<Board>>([]);
   const [ownerBoards, setOwnerBoards] = useState<Array<Board>>([]);

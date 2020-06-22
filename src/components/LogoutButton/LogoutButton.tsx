@@ -6,7 +6,7 @@ import { Button } from "@material-ui/core";
 interface LogoutButtonProps {}
 
 const LogoutButton: React.FC<LogoutButtonProps> = () => {
-  const [user] = useContext(UserContext);
+  const user = useContext(UserContext);
   const firebase = useContext(FirebaseContext);
 
   const logout = () => {

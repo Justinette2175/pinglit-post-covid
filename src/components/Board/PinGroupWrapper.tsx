@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import clx from "classnames";
+import Measure from "react-measure";
 import { PinGroup as PinGroupType, PinDimension } from "../../types";
 import { Box } from "@material-ui/core";
 import { createStyles, makeStyles, Theme } from "@material-ui/core/styles";
@@ -20,6 +21,9 @@ const usePinStyles = makeStyles((theme: Theme) => {
         opacity: 1,
       },
     },
+    measure: {
+      paddingBottom: theme.spacing(0.5),
+    },
   });
 });
 
@@ -33,6 +37,7 @@ interface PinProps {
 
 const PinGroupWrapper: React.FC<PinProps> = ({
   pinGroup,
+  children,
   onDimensions,
   left,
   top,
@@ -46,13 +51,6 @@ const PinGroupWrapper: React.FC<PinProps> = ({
   }>({ currentTop: null, currentLeft: null });
 
   const classes = usePinStyles({ width, currentLeft, currentTop });
-
-  useEffect(() => {
-    if (element.current) {
-      const height = element.current.offsetHeight;
-      onDimensions({ height });
-    }
-  }, []);
 
   useEffect(() => {
     if ((left || left === 0) && (top || top === 0)) {
@@ -70,7 +68,18 @@ const PinGroupWrapper: React.FC<PinProps> = ({
       })}
       ref={element}
     >
-      <PinGroup pinGroup={pinGroup} />
+      <Measure
+        bounds
+        onResize={(contentRect: any) => {
+          onDimensions({ height: contentRect?.bounds?.height });
+        }}
+      >
+        {({ measureRef }) => (
+          <div className={classes.measure} ref={measureRef}>
+            {children}
+          </div>
+        )}
+      </Measure>
     </div>
   );
 };

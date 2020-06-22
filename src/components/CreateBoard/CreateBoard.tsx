@@ -14,7 +14,7 @@ interface CreateBoardProps {
 }
 
 const CreateBoard: React.FC<CreateBoardProps> = ({ onClose }) => {
-  const [user] = useContext(UserContext);
+  const user = useContext(UserContext);
   const firebase = useContext(FirebaseContext);
   const [error, setError] = useState<Error>(null);
 

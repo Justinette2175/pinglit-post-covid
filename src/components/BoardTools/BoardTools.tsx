@@ -1,20 +1,22 @@
 import React, { useState } from "react";
-import { IconButton, Box, Dialog } from "@material-ui/core";
-import { PlusSquare, UserPlus } from "react-feather";
+import { IconButton, Box, Dialog, Button } from "@material-ui/core";
+import { PlusSquare, UserPlus, Filter } from "react-feather";
 import CreatePin from "components/CreatePin";
 import UpdateBoardPermissions from "components/UpdateBoardPermissions";
+import { ZoomIn, ZoomOut } from "react-feather";
 
 interface BoardToolsProps {
-  boardId: string;
+  openMenu: () => void;
+  handleZoom: (direction: "IN" | "OUT") => void;
 }
 
-const BoardTools: React.FC<BoardToolsProps> = ({ boardId }) => {
+const BoardTools: React.FC<BoardToolsProps> = ({ openMenu, handleZoom }) => {
   const [createPinVisible, setCreatePinVisible] = useState<boolean>(false);
   const [addMemberVisible, setAddMemberVisible] = useState<boolean>(false);
 
   return (
     <>
-      <Box display="flex" bgcolor="background.paper" width="100%" px={2} py={1}>
+      <Box display="flex" width="100%" justifyContent="space-between">
         <Box display="flex">
           <IconButton onClick={() => setCreatePinVisible(true)}>
             <PlusSquare size={20} />
@@ -22,6 +24,19 @@ const BoardTools: React.FC<BoardToolsProps> = ({ boardId }) => {
           <IconButton onClick={() => setAddMemberVisible(true)}>
             <UserPlus size={20} />
           </IconButton>
+        </Box>
+        <Box>
+          <Box ml={2}>
+            <IconButton onClick={() => handleZoom("IN")}>
+              <ZoomIn size={20} />
+            </IconButton>
+            <IconButton onClick={() => handleZoom("OUT")}>
+              <ZoomOut size={20} />
+            </IconButton>
+          </Box>
+          <Button color="primary" startIcon={<Filter />} onClick={openMenu}>
+            Filters
+          </Button>
         </Box>
       </Box>
       <Dialog

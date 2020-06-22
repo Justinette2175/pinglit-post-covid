@@ -4,8 +4,9 @@ import { UserContext, BoardContext } from "../../contexts";
 
 import { Board, BoardHeader } from "../../components";
 
-import { Board as BoardType } from "../../types";
+import { Board as BoardType, Label, Reaction, BoardFilters } from "../../types";
 import { Box } from "@material-ui/core";
+import BoardSideMenu from "components/BoardSideMenu";
 
 interface BoardPageProps {
   match: {
@@ -21,38 +22,102 @@ const BoardPage: React.FC<BoardPageProps> = ({
   },
 }) => {
   const firebase = useContext(FirebaseContext);
-  const [user] = useContext(UserContext);
   const [error, setError] = useState<Error>(null);
+  const [menuOpen, setMenuOpen] = useState<boolean>(false);
   const [board, setBoard] = useState<BoardType>(null);
+  const [appbarHeight, setAppbarHeight] = useState<number>(0);
+  const [numberOfColumns, setNumberOfColumns] = useState<number>(4);
 
-  const unsubscribeFromBoard = useRef(null);
+  const [filters, setFilters] = useState<BoardFilters>({
+    labels: [],
+    reactions: [],
+    authors: [],
+  });
 
   const listenToBoard = () => {
     return firebase.firestore
       .collection("boards")
       .doc(boardId)
       .onSnapshot((doc: any) => {
-        setBoard({ uid: doc.id, ...doc.data() });
+        setBoard((board) => ({ ...board, uid: doc.id, ...doc.data() }));
       });
   };
-  const unsubscribe = () => {
-    if (unsubscribeFromBoard.current) {
-      unsubscribeFromBoard.current();
-    }
+
+  const listenToBoardLabels = () => {
+    return firebase.firestore
+      .collection("boards")
+      .doc(boardId)
+      .collection("labels")
+      .onSnapshot((snapshot: any) => {
+        const newLabels: Array<Label> = [];
+        snapshot.forEach((snap: any) => {
+          newLabels.push({
+            uid: snap.id,
+            ...snap.data(),
+          });
+        });
+        setBoard((board) => ({ ...board, boardLabels: newLabels }));
+      });
+  };
+
+  const listenToBoardReactions = () => {
+    return firebase.firestore
+      .collection("boards")
+      .doc(boardId)
+      .collection("reactions")
+      .onSnapshot((snapshot: any) => {
+        const newReactions: Array<Reaction> = [];
+        snapshot.forEach((snap: any) => {
+          newReactions.push({
+            uid: snap.id,
+            ...snap.data(),
+          });
+        });
+        setBoard((board) => ({ ...board, boardReactions: newReactions }));
+      });
   };
 
   useEffect(() => {
-    unsubscribeFromBoard.current = listenToBoard();
-    return unsubscribe;
+    if (boardId && (!board || board.uid !== boardId)) {
+      const unsubscribeFromBoard = listenToBoard();
+      const unsubscribeFromBoardLabels = listenToBoardLabels();
+      const unsubscribeFromBoardReactions = listenToBoardReactions();
+      return () => {
+        unsubscribeFromBoard();
+        unsubscribeFromBoardLabels();
+        unsubscribeFromBoardReactions();
+      };
+    }
   }, []);
+
+  const handleAppbarHeight = (height: number) => {
+    setAppbarHeight(height);
+  };
+
+  const handleZoom = (direction: "IN" | "OUT") => {
+    if (direction === "IN") {
+      setNumberOfColumns(numberOfColumns + 1);
+    } else {
+      const newNumberOfColumns = numberOfColumns - 1;
+      if (newNumberOfColumns > 0) {
+        setNumberOfColumns(newNumberOfColumns);
+      }
+    }
+  };
 
   return (
     <BoardContext.Provider value={board}>
-      <Box width="100vw">
-        <BoardHeader data={board} />
-        <Box width="100vw">
-          <Board />
+      <Box>
+        <BoardHeader
+          onFiltersChange={setFilters}
+          onAppbarHeight={handleAppbarHeight}
+          onMenuOpen={() => setMenuOpen(true)}
+          handleZoom={handleZoom}
+        />
+        <Box width="100vw" position="relative" top={appbarHeight}>
+          <Board numberOfColumns={numberOfColumns} filters={filters} />
         </Box>
+        <BoardSideMenu open={menuOpen} onClose={() => setMenuOpen(false)} />
       </Box>
     </BoardContext.Provider>
   );

@@ -15,7 +15,7 @@ import InvitationPage from "./pages/InvitationPage";
 import { MuiThemeProvider } from "@material-ui/core/styles";
 import { CssBaseline, Box } from "@material-ui/core";
 import I404Page from "./pages/404Page";
-import { UserContext } from "./contexts";
+import UserContext from "./contexts/UserContext";
 
 import { User } from "./types";
 
@@ -24,39 +24,69 @@ import AppBar from "./components/AppBar";
 const firebase = new Firebase();
 
 interface AuthData {
-  authUser: User;
+  authUser: any;
   authenticated: boolean;
   loading: boolean;
 }
 
+const PrivateRoute: React.FC<any> = ({
+  authenticated,
+  component: Component,
+  ...rest
+}) => {
+  return (
+    <Route
+      {...rest}
+      render={(props) =>
+        authenticated ? (
+          <Component {...props} />
+        ) : (
+          <Redirect
+            to={{
+              pathname: "/login",
+              search: `?redirect=${props.location.pathname}`,
+            }}
+          />
+        )
+      }
+    />
+  );
+};
+
 function App() {
-  const [user, setUser] = useState<User>({});
-  const [{ authUser, authenticated, loading }, setAuthData] = useState<
-    AuthData
-  >({
+  const [user, setUser] = useState<User>(null);
+  const [authData, setAuthData] = useState<AuthData>({
     authUser: null,
     loading: true,
     authenticated: false,
   });
 
+  const { authUser, authenticated, loading } = authData || {};
+
   useEffect(() => {
-    const unsubsribe = firebase.auth.onAuthStateChanged((user: any) => {
-      if (user) {
-        setAuthData({ authUser: user, authenticated: true, loading: false });
+    console.log("app loading");
+    firebase.auth.onAuthStateChanged((u: any) => {
+      if (u) {
+        setAuthData({
+          authUser: u,
+          authenticated: true,
+          loading: false,
+        });
       } else {
         setAuthData({ authUser: null, authenticated: false, loading: false });
       }
     });
-    return () => unsubsribe();
   }, []);
 
   const listenToUser = () => {
     try {
-      firebase.firestore
+      return firebase.firestore
         .collection("users")
         .doc(authUser.uid)
         .onSnapshot((u: any) => {
-          setUser({ uid: u.id, ...u.data() });
+          const userData = u.data();
+          console.log("userData", userData);
+          setUser({ uid: u.id, ...userData });
         });
     } catch (e) {}
   };
@@ -73,43 +103,27 @@ function App() {
     };
   }, [authUser]);
 
-  const PrivateRoute: React.FC<any> = (props: any) => {
-    if (!authenticated) {
-      return (
-        <Redirect
-          to={{
-            pathname: "/login",
-            search: `?redirect=${props.location.pathname}`,
-          }}
-        />
-      );
-    }
-    return <Route {...props} />;
-  };
-
-  if (loading) {
+  if (loading || (authenticated && !user)) {
     return <div>Loading</div>;
   }
 
   return (
     <FirebaseContext.Provider value={firebase}>
-      <UserContext.Provider value={[user, setUser]}>
+      <UserContext.Provider value={user}>
         <MuiThemeProvider theme={lightTheme}>
           <CssBaseline />
-          <AppBar />
-          <Box position="relative" top="64px">
+          <Box position="relative">
             <Switch>
               <PrivateRoute
-                exact
-                path="/"
-                render={() => <Redirect to="/boards" />}
-              />
-              <PrivateRoute
+                authenticated={authenticated}
                 path="/invitations/:invitationId"
                 component={InvitationPage}
               />
-              <PrivateRoute exact path="/boards" component={BoardsPage} />
-              <PrivateRoute path="/boards/:boardId" component={BoardPage} />
+              <PrivateRoute
+                authenticated={authenticated}
+                path="/boards/:boardId"
+                component={BoardPage}
+              />
               <Route
                 exact
                 path="/login"
@@ -125,6 +139,18 @@ function App() {
                     <RegisterPage {...props} />
                   )
                 }
+              />
+              <PrivateRoute
+                authenticated={authenticated}
+                exact
+                path="/boards"
+                component={BoardsPage}
+              />
+              <Route
+                authenticated={authenticated}
+                exact
+                path="/"
+                render={() => <Redirect to="/boards" />}
               />
               <Route component={I404Page} />
             </Switch>

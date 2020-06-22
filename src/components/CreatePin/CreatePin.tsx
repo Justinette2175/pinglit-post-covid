@@ -35,7 +35,7 @@ const CreatePin: React.FC<CreatePinProps> = ({
   endStep,
   onClose,
 }) => {
-  const [user] = useContext(UserContext);
+  const user = useContext(UserContext);
   const firebase = useContext(FirebaseContext);
   const [error, setError] = useState<Error>(null);
   const [selectedType, setSelectedType] = useState<PinContentType>(null);

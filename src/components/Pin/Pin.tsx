@@ -1,5 +1,11 @@
 import React, { useContext } from "react";
-import { Button, Box, Typography } from "@material-ui/core";
+import {
+  Button,
+  Box,
+  Typography,
+  Card,
+  CardActionArea,
+} from "@material-ui/core";
 import { Pin as PinType, Content } from "../../types";
 import { User, MessageSquare } from "react-feather";
 
@@ -42,7 +48,7 @@ const Pin: React.FC<PinProps> = ({ data }) => {
         {isArray(data.content) &&
           data.content.map((c, i) => getContentMarkup(c, i))}
       </Box>
-      <Box display="flex" justifyContent="space-between">
+      <Box display="flex" justifyContent="space-between" px={2}>
         <Typography variant="caption">
           <User size={14} />
           {data.createdBy?.username}
