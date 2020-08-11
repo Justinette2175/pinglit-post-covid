@@ -21,7 +21,7 @@ const BoardHeader: React.FC<BoardHeaderProps> = ({
   handleZoom,
 }) => {
   const board = useContext(BoardContext);
-  if (!board || !board.content) {
+  if (!board || !board.resource) {
     return null;
   }
 
@@ -31,7 +31,7 @@ const BoardHeader: React.FC<BoardHeaderProps> = ({
 
   return (
     <AppBar onResize={onAppbarHeight}>
-      <Box display="flex" width="100%" py={2} alignItems="flex-start">
+      <Box display="flex" width="100%" p={2} pt={0} alignItems="flex-start">
         <Box mr={2}>
           <IconButton
             component={Link}
@@ -43,14 +43,15 @@ const BoardHeader: React.FC<BoardHeaderProps> = ({
             <ArrowLeft size={20} />
           </IconButton>
         </Box>
-        <Box mt={1}>
-          {board.content?.image && (
-            <Box>
-              <img src={board.content.image} />
+        <Box mt={1} display={"flex"}>
+          {board.resource?.image && (
+            <Box mr={2}>
+              <img src={board.resource.image} />
             </Box>
           )}
           <Box>
-            <Typography variant="h2">{board.content.title}</Typography>
+            <Typography variant="h2">{board.resource.title}</Typography>
+            <Typography variant="h3">{board.resource.author}</Typography>
           </Box>
         </Box>
       </Box>

@@ -61,12 +61,11 @@ export const NumberInput: React.FC<NumberInputProps> = ({
   return (
     <NumberFormatLocal
       customInput={TextField}
-      margin="normal"
+      margin="none"
       name={field.name}
       {...getFormatProps()}
       value={formattedValue}
       displayType="input"
-      variant="outlined"
       error={meta.touched && meta.error}
       helperText={(meta.touched && meta.error) || ""}
       allowLeadingZeros={false}

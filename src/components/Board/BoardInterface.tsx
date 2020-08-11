@@ -31,6 +31,7 @@ interface BoardProps {
   lastStep?: number;
   pinsGroups: Array<PinGroupType>;
   numberOfColumns: number;
+  pinSteps: Array<number | string>;
 }
 
 type Interval = Array<number>;

@@ -17,17 +17,17 @@ const AppBar: React.FC<AppBarProps> = ({ children, onResize }) => {
     >
       {({ measureRef }) => (
         <MuiAppBar ref={measureRef} color="default" position="fixed">
-          <Toolbar>
-            <Box
-              display="flex"
-              width="100%"
-              justifyContent="space-between"
-              alignItems="flex-start"
-            >
-              <Box flexGrow={1}>{children}</Box>
-              <LogoutButton />
-            </Box>
-          </Toolbar>
+          <Box
+            py={1}
+            px={2}
+            display="flex"
+            width="100vw"
+            justifyContent="flex-end"
+            alignItems="flex-start"
+          >
+            <LogoutButton />
+          </Box>
+          {children}
         </MuiAppBar>
       )}
     </Measure>

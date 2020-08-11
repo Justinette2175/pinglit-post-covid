@@ -1,13 +1,22 @@
 import React, { useState, useContext } from "react";
 import { FirebaseContext } from "../../firebase";
 import { UserContext } from "../../contexts";
-import { Typography, Button, Box } from "@material-ui/core";
-import { NumberInput } from "../inputs";
 import { Form, Formik } from "formik";
-import * as Yup from "yup";
-import { NewBoard } from "../../types";
+import { NewBoard, BoardContentType, StepUnit } from "../../types";
+import uuid from "uuid-v4";
 
-interface FormValues {}
+import SelectBoardResourceType from "./SelectBoardResourceType";
+import SelectBoardResourceInfo from "./SelectBoardResourceInfo";
+import ReviewBoardInfo from "./ReviewBoardInfo";
+
+interface FormValues {
+  type: BoardContentType;
+  resource: any;
+  unit: string;
+  unitType: StepUnit;
+  startStep: number;
+  endStep: number;
+}
 
 interface CreateBoardProps {
   onClose: () => void;
@@ -17,6 +26,7 @@ const CreateBoard: React.FC<CreateBoardProps> = ({ onClose }) => {
   const user = useContext(UserContext);
   const firebase = useContext(FirebaseContext);
   const [error, setError] = useState<Error>(null);
+  const [step, setStep] = useState<number>(1);
 
   const createBoard = async (newBoard: NewBoard) => {
     try {
@@ -28,42 +38,74 @@ const CreateBoard: React.FC<CreateBoardProps> = ({ onClose }) => {
   };
 
   const handleSubmit = (values: FormValues) => {
+    const versionId = uuid();
     const newBoard: NewBoard = {
       owners: {
         [user.uid]: {
           username: user.username || "",
+        },
+      },
+      members: {
+        [user.uid]: {
+          username: user.username || "",
           hasAccess: true,
+          version: versionId,
         },
       },
       stepUnit: {
-        type: "INTEGER",
-        key: "p.",
+        type: values.unitType,
+        key: values.unit,
       },
       pinCount: 0,
-      content: {
-        type: "BOOK",
-        title: "The Great Gatsby",
-        author: "Scott Fitzgerald",
+      type: values.type,
+      resource: values.resource,
+      versions: {
+        [versionId]: {
+          ...values.resource,
+          startStep: values.startStep,
+          endStep: values.endStep,
+        },
       },
     };
     createBoard(newBoard);
   };
 
   return (
-    <Box p={4} width={"500px"}>
-      <Formik validateOnMount={true} initialValues={{}} onSubmit={handleSubmit}>
-        {({ isValid, values }) => (
+    <>
+      <Formik
+        validateOnMount={true}
+        initialValues={{
+          type: "BOOK",
+          resource: null,
+          unit: "p.",
+          unitType: "INTEGER",
+          startStep: null,
+          endStep: null,
+        }}
+        onSubmit={handleSubmit}
+      >
+        {({ isValid, setFieldValue, values }) => (
           <Form>
-            <Box mb={3}>
-              <NumberInput name="page" label="Page" />
-            </Box>
-            <Button type="submit" color="primary" variant="contained">
-              Create board
-            </Button>
+            {step === 1 && (
+              <SelectBoardResourceType onNext={() => setStep(2)} />
+            )}
+            {step === 2 && values.type === "BOOK" && (
+              <SelectBoardResourceInfo
+                resourceType={values.type}
+                onNext={() => setStep(3)}
+                onPrevious={() => setStep(1)}
+              />
+            )}
+            {step === 3 && (
+              <ReviewBoardInfo
+                onEditResource={() => setStep(2)}
+                resource={values.resource}
+              />
+            )}
           </Form>
         )}
       </Formik>
-    </Box>
+    </>
   );
 };
 

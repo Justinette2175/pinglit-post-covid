@@ -141,11 +141,21 @@ const Board: React.FC<BoardProps> = ({ filters, numberOfColumns }) => {
     (a, b) => a.percentage - b.percentage
   );
 
+  const pinSteps = pins.reduce((acc: Array<number>, p) => {
+    if (acc.indexOf(p.location.percentage) < 0) {
+      acc.push(p.location.percentage);
+    }
+    return acc;
+  }, []);
+
+  console.log("pinSteps", pinSteps);
+
   return (
     <BoardInterface
       boardId={boardId}
       pinsGroups={pinGroups}
       numberOfColumns={numberOfColumns}
+      pinSteps={pinSteps}
     />
   );
 };

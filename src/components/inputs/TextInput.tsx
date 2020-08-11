@@ -9,13 +9,12 @@ export const TextInput = React.forwardRef<HTMLInputElement, TextFieldProps>(
 
     return (
       <TextField
-        margin="normal"
+        margin="none"
         {...field}
         error={meta.touched && meta.error ? true : false}
         {...rest}
         helperText={(meta.touched && meta.error) || ""}
         ref={ref}
-        variant="outlined"
       />
     );
   }

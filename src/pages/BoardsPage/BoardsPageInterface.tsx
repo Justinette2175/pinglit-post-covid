@@ -3,7 +3,7 @@ import { FirebaseContext } from "../../firebase";
 import { UserContext } from "../../contexts";
 import { Board } from "../../types";
 
-import { Grid } from "@material-ui/core";
+import { Grid, Box } from "@material-ui/core";
 import BoardVignette from "./BoardVignette";
 import { BoardsTools } from "../../components";
 
@@ -15,14 +15,18 @@ const BoardsPageInterface: React.FC<BoardsPageInterfaceProps> = ({
   boards,
 }) => {
   return (
-    <Grid container spacing={2}>
+    <>
       <BoardsTools />
-      {boards.map((b, i) => (
-        <Grid item key={`board-${i}`}>
-          <BoardVignette board={b} />
-        </Grid>
-      ))}
-    </Grid>
+      <Box display="flex" width="100vw" p={4}>
+        {boards.map((b, i) =>
+          b.resource ? (
+            <Box mr={2}>
+              <BoardVignette board={b} />
+            </Box>
+          ) : null
+        )}
+      </Box>
+    </>
   );
 };
 

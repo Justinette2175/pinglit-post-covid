@@ -3,6 +3,7 @@ import { Typography, IconButton, Box, Dialog } from "@material-ui/core";
 import { Board } from "../../types";
 import { PlusSquare } from "react-feather";
 import CreateBoard from "components/CreateBoard";
+import Modal from "../Modal";
 
 interface BoardsToolsProps {}
 
@@ -26,9 +27,9 @@ const BoardsTools: React.FC<BoardsToolsProps> = ({}) => {
           </IconButton>
         </Box>
       </Box>
-      <Dialog open={CreateBoardVisible} onClose={handleCloseCreateBoard}>
+      <Modal open={CreateBoardVisible} onClose={handleCloseCreateBoard}>
         <CreateBoard onClose={handleCloseCreateBoard} />
-      </Dialog>
+      </Modal>
     </>
   );
 };

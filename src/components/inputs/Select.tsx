@@ -93,8 +93,7 @@ const Select: React.FC<SelectPropsCustom> = ({
       disabled={disabled}
       fullWidth={fullWidth}
       required={required}
-      margin={margin || "normal"}
-      variant="outlined"
+      margin={"none"}
     >
       {label && (
         <InputLabel id={name} shrink>

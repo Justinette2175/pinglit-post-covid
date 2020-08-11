@@ -1,7 +1,7 @@
 import { string } from "yup";
 
-type BoardContentType = "BOOK" | "ARTICLE";
-type StepUnit = "INTEGER" | "NUMBER" | "LETTER";
+export type BoardContentType = "BOOK" | "ARTICLE";
+export type StepUnit = "INTEGER" | "NUMBER" | "LETTER";
 type PinType =
   | "YOUTUBE"
   | "VIMEO"
@@ -42,14 +42,13 @@ export interface NewBoard {
   owners: {
     [userId: string]: {
       username: string;
-      hasAccess: boolean;
     };
   };
-  members?: {
-    [userId: string]: { username: string; hasAccess: boolean };
+  members: {
+    [userId: string]: { username: string; version: string; hasAccess: true };
   };
-  content: {
-    type: BoardContentType;
+  type: BoardContentType;
+  resource: {
     title: string;
     author?: string;
     image?: string;
@@ -57,10 +56,21 @@ export interface NewBoard {
   stepUnit: {
     type: StepUnit;
     key: string;
+    longName: string;
   };
-  bookVersions?: {
+  versions?: {
     [key: string]: BookVersion;
   };
+}
+
+export interface Resource {
+  title: string;
+  author?: string;
+  image?: string;
+  googleId?: string;
+  publisher?: string;
+  publishedDate?: string;
+  description?: string;
 }
 
 export interface Board {
@@ -72,20 +82,17 @@ export interface Board {
       username: string;
     };
   };
+  type: BoardContentType;
   members: {
-    [userId: string]: { username: string };
+    [userId: string]: { username: string; version: string; hasAccess: boolean };
   };
-  content: {
-    type: BoardContentType;
-    title: string;
-    author?: string;
-    image?: string;
-  };
+  resource: Resource;
   stepUnit: {
     type: StepUnit;
     key: string;
+    longName: string;
   };
-  bookVersions: {
+  versions: {
     [key: string]: BookVersion;
   };
   pinAuthors: {
@@ -112,12 +119,9 @@ export interface Permission {
 }
 
 export interface BookVersion {
-  id: string;
   startStep: number;
   endStep: number;
   image: string;
-  authors: Array<string>;
-  title: string;
 }
 
 export interface NewPin {

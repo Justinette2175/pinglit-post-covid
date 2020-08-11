@@ -34,6 +34,7 @@
     "typescript": "^3.7.5",
     "url-parse": "^1.4.7",
     "use-constant": "^1.0.0",
+    "uuid-v4": "^0.1.0",
     "yup": "^0.29.1"
   },
   "scripts": {

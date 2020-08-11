@@ -4,6 +4,7 @@ import { PlusSquare, UserPlus, Filter } from "react-feather";
 import CreatePin from "components/CreatePin";
 import UpdateBoardPermissions from "components/UpdateBoardPermissions";
 import { ZoomIn, ZoomOut } from "react-feather";
+import Modal from "../Modal";
 
 interface BoardToolsProps {
   openMenu: () => void;
@@ -16,7 +17,7 @@ const BoardTools: React.FC<BoardToolsProps> = ({ openMenu, handleZoom }) => {
 
   return (
     <>
-      <Box display="flex" width="100%" justifyContent="space-between">
+      <Box display="flex" width="100vw" justifyContent="space-between" px={2}>
         <Box display="flex">
           <IconButton onClick={() => setCreatePinVisible(true)}>
             <PlusSquare size={20} />
@@ -39,18 +40,12 @@ const BoardTools: React.FC<BoardToolsProps> = ({ openMenu, handleZoom }) => {
           </Button>
         </Box>
       </Box>
-      <Dialog
-        open={createPinVisible}
-        onClose={() => setCreatePinVisible(false)}
-      >
+      <Modal open={createPinVisible} onClose={() => setCreatePinVisible(false)}>
         <CreatePin onClose={() => setCreatePinVisible(false)} />
-      </Dialog>
-      <Dialog
-        open={addMemberVisible}
-        onClose={() => setAddMemberVisible(false)}
-      >
+      </Modal>
+      <Modal open={addMemberVisible} onClose={() => setAddMemberVisible(false)}>
         <UpdateBoardPermissions />
-      </Dialog>
+      </Modal>
     </>
   );
 };

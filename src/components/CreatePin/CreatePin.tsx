@@ -16,6 +16,7 @@ const PERMISSION_OPTIONS: Array<{ label: string; value: PinPermission }> = [
 interface FormValues {
   permission: PinPermission;
   percentage: number;
+  stepValue: number | string;
   quote: string;
   text: string;
   link: {
@@ -69,6 +70,7 @@ const CreatePin: React.FC<CreatePinProps> = ({
       commentsCount: 0,
       location: {
         percentage: values.percentage,
+        stepValue: values.stepValue,
       },
       referenceQuote: values.quote,
       content,
@@ -84,13 +86,14 @@ const CreatePin: React.FC<CreatePinProps> = ({
   });
 
   return (
-    <Box p={4} width={"500px"}>
+    <>
       <Formik
         validationSchema={validationSchema}
         validateOnMount={true}
         initialValues={{
           permission: "PRIVATE",
           percentage: 0,
+          stepValue: null,
           quote: "",
           text: "",
           link: {
@@ -103,7 +106,19 @@ const CreatePin: React.FC<CreatePinProps> = ({
         {({ isValid, values }) => (
           <Form>
             <Box maxWidth="100px">
-              <NumberInput name="percentage" label="Percentage" fullWidth />
+              {board.stepUnit.type === "INTEGER" ? (
+                <NumberInput
+                  name="stepValue"
+                  label={board.stepUnit.longName || board.stepUnit.key}
+                  fullWidth
+                />
+              ) : (
+                <TextInput
+                  name="stepValue"
+                  label={board.stepUnit.longName || board.stepUnit.key}
+                  fullWidth
+                />
+              )}
             </Box>
             <TextInput
               name="quote"
@@ -151,7 +166,7 @@ const CreatePin: React.FC<CreatePinProps> = ({
           </Form>
         )}
       </Formik>
-    </Box>
+    </>
   );
 };
 
